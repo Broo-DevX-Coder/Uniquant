@@ -14,3 +14,11 @@ class UnknownError(Exception):
 
     def __str__(self):
         return f"Unknown Error >> {self.error}"
+    
+class ValueError(Exception):
+    """ Exeption for value incorrect in functions """
+    def __init__(self,error):
+        self.error = error
+
+    def __str__(self):
+        return f"Value Error >> {self.error}"
