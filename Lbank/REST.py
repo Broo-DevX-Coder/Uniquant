@@ -38,15 +38,12 @@ class AsyncClient():
 
     # Get the HMAC signateur
     async def genirate_sign(self,body:dict,auth:str):
-        print(f"[3] Symbole is >>> {auth}")
         sorted_parms = dict(sorted((k, str(v)) for k, v in body.items()))
         strs = "&".join(f"{k}={v}" for k, v in sorted_parms.items())
         pripare_case = hashlib.md5(strs.encode()).hexdigest().upper()
         signature = hmac.new(
             self.api_secret.encode(), pripare_case.encode(), hashlib.sha256
         ).hexdigest()
-        print(f"===============================\n{strs}\n=============================")
-        print(f"[4] Symbole is >>> {auth}")
         return signature
 
 
@@ -94,7 +91,6 @@ class AsyncClient():
             raise UnknownError(e)
        
     async def place_order(self, symbol: str, type_: str, amount: dict, price: dict = None):
-        print(f"[1] Symbole is >>> {symbol}")
         if not amount.get('value') or not amount.get('checkScal'):
             raise ValueError("You must provide amount as {'value':float ,'checkScal':int} ")
     
@@ -137,31 +133,14 @@ class AsyncClient():
         sign_parms = headers.copy()
         sign_parms.update({"api_key": self.api_key})
 
-        print(f"[2] Symbole is >>> {symbol}")
         body["sign"] = str(await self.genirate_sign(body,symbol))
 
         async with self.session.post(PLACE_ORDER, data=body) as resp:
             resp_json = await resp.text()
-            print(resp_json)
+            print(f"{resp_json} -> {symbol}")
 
                 
 
 
 # ============================================
 # ============================================
-async def main():
-    try:
-
-        async with AsyncClient("91c90147-e1e6-4db1-b8ee-a6bc48ab4e5b", "1DF9D32DD8DA8289D00491577C6C9BC7") as client:
-            await client.place_order("btc_usdt","buy",{'value':0.001,'checkScal':4},{'value':300000,'checkScal':4})
-            #print("================================================")
-            #print(await client.get_all_pairs())
-            #print("================================================")
-            #print(await client.get_pairs_info("btc_usdt"))
-
-    except (KeyboardInterrupt, asyncio.CancelledError):
-        print("Shutdown requested.")
-    finally:
-        print("Cleanup done.")
-
-asyncio.run(main())
