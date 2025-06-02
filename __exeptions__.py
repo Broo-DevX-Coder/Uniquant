@@ -5,7 +5,7 @@ class RequestCodeError(Exception):
         self.request_error = request_error
 
     def __str__(self):
-        return f"Request code error >> {self.request_error}"
+        return f"Request code error >> {self.request_error}" 
     
 class UnknownError(Exception):
     """ Exeption for Unknown errors """
