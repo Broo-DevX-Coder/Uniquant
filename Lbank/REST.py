@@ -6,7 +6,7 @@ import time
 # DIRS =====================================
 BASE_DIR = os.path.dirname(__file__)
 PAKAGES_DIR = os.path.abspath(os.path.join(BASE_DIR,".."))
-
+ 
 # Append packages path ======================
 sys.path.append(PAKAGES_DIR)
 
@@ -18,7 +18,7 @@ BASE_URL = "https://api.lbkex.com"
 GET_ALL_PAIRS = f"{BASE_URL}/v2/currencyPairs.do"
 GET_PAIRS_INFO  = f"{BASE_URL}/v2/accuracy.do"
 PLACE_ORDER  = f"{BASE_URL}/v2/supplement/create_order.do"
-
+DEPTH = f"{BASE_URL}/v2/depth.do"
 
 # The client class ====================================
 class AsyncClient():
@@ -48,11 +48,13 @@ class AsyncClient():
 
 
     
-    # Manual (Used By User) ----------------------------
+    # Manual (Used By User) -------------------------------------------
+
     # To close connection
     async def close(self):
         await self.session.close()
 
+    # PUBLIC --------------------------------
     # To get all spot trading pairs ...
     async def get_all_pairs(self) -> list:
         try:
@@ -62,7 +64,7 @@ class AsyncClient():
 
                     if data.get("error_code") == 0:
                         pairs = data.get("data",[])
-                        return pairs
+                        return set(pairs)
                     else:
                         raise RequestCodeError(f"{data.get('error_code')} | With a message from server >> {data.get('msg')}")
                 
@@ -89,7 +91,25 @@ class AsyncClient():
                     raise RequestCodeError(f"{resp.status}")
         except Exception as e:
             raise UnknownError(e)
-       
+        
+    async def order_book(self,code:str,limit:int):
+        try:
+            url = f"{DEPTH}?size={limit}&symbol={code}"
+            async with self.session.get(url) as resp:
+                if resp.status == 200:
+                    data = await resp.json()
+                    if data.get("error_code") == 0:
+                        return data
+                    else:
+                        raise RequestCodeError(f"{data.get('error_code')} | With a message from server >> {data.get('msg')}")
+                else:
+                    raise RequestCodeError(f"{resp.status}")
+        except Exception as e:
+            raise UnknownError(e)
+        
+
+    # PRIVATE --------------------------------- 
+    # to place any spot order    
     async def place_order(self, symbol: str, type_: str, amount: dict, price: dict = None):
         if not amount.get('value') or not amount.get('checkScal'):
             raise ValueError("You must provide amount as {'value':float ,'checkScal':int} ")
@@ -138,9 +158,3 @@ class AsyncClient():
         async with self.session.post(PLACE_ORDER, data=body) as resp:
             resp_json = await resp.text()
             print(f"{resp_json} -> {symbol}")
-
-                
-
-
-# ============================================
-# ============================================
