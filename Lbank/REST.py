@@ -5,13 +5,9 @@ import time
 
 # DIRS =====================================
 BASE_DIR = os.path.dirname(__file__)
-PAKAGES_DIR = os.path.abspath(os.path.join(BASE_DIR,".."))
- 
-# Append packages path ======================
-sys.path.append(PAKAGES_DIR)
 
 # Packages from projuct ====================
-from __exeptions__ import RequestCodeError,UnknownError
+from uniquant.main.__exeptions__ import RequestCodeError,UnknownError
 
 # EndPointes ============================
 BASE_URL = "https://api.lbkex.com"
