@@ -101,7 +101,7 @@ class AsyncClient():
                 else:
                     raise RequestCodeError(f"{resp.status}")
         except Exception as e:
-            raise UnknownError(e)
+            v
         
 
     # PRIVATE --------------------------------- 
@@ -150,7 +150,15 @@ class AsyncClient():
         sign_parms.update({"api_key": self.api_key})
 
         body["sign"] = str(await self.genirate_sign(body,symbol))
-
-        async with self.session.post(PLACE_ORDER, data=body) as resp:
-            resp_json = await resp.text()
-            print(f"{resp_json} -> {symbol}")
+        try:
+            async with self.session.post(PLACE_ORDER, data=body) as resp:
+                if resp.status == 200:
+                    data = await resp.json()
+                    if data.get("error_code") == 0:
+                        return data
+                    else:
+                        raise RequestCodeError(f"{data.get('error_code')} | With a message from server >> {data.get('msg')}")
+                else:
+                    raise RequestCodeError(f"{resp.status}")
+        except Exception as e:
+            raise UnknownError(e)
