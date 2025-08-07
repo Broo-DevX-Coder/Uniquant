@@ -1,4 +1,18 @@
+# ⚠️ Disclaimer
 
+> UniQuant is an open-source project developed solely for educational and experimental purposes.
+Any use of this library for unethical or illegal purposes is strictly prohibited, including but not limited to:
+Engaging in pump-and-dump schemes or buying tokens that are questionable under Islamic law (Shariah)
+Utilizing this library for futures trading, leveraged trading, or other high-risk financial instruments
+Employing this tool in unregulated or illegal markets
+The author assumes no responsibility for misuse or violations of legal, ethical, or religious standards.
+Users must ensure compliance with all local laws, exchange policies, and religious guidelines.
+
+❌ Project Status: Discontinued
+
+> This project has been discontinued and is no longer maintained.
+The reason for stopping development is that more powerful and robust libraries are now available, offering broader support, improved performance, and more flexibility than what this project provides.
+Developers are encouraged to explore and adopt those more complete alternatives depending on their specific needs.
 
 # 📘 LBank AsyncClient Usage Guide
 
