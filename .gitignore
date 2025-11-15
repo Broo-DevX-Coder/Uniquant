@@ -1,2 +1,23 @@
-__pycache__
+
 .env
+# Ignore any test.py files placed in subdirectories
+**/test.py
+
+# Python cache directories and compiled files
+**/__pycache__/
+__pycache__/
+*.py[cod]
+
+# Common virtualenv and environment files
+venv/
+.venv/
+.env.local
+
+# Editor and tool folders
+.vscode/
+.idea/
+
+# Build/dist
+dist/
+build/
+*.egg-info/

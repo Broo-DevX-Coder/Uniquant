@@ -1,22 +1,21 @@
 # ---------------------------------------------------------------
 # Import libs and modules 
 # ---------------------------------------------------------------
-import os
-import sys
-from pathlib import Path
-
 import asyncio
 import aiohttp
+
+from .__exceptions__ import *
 
 # ---------------------------------------------------------------
 #  Main Class
 # ---------------------------------------------------------------
-class CoreIndex:
+class PlatformIndex:
     def _init__(self,symbol:str,*args, **kwargs):
         # Base attributes
+        self.platform_name = "Platform"
         self.SYMBOL = symbol
         self.async_tasks = []
-        self.rest_session = aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(20))
+        self.rest_session = None
 
         # Order-book attributes
         self.snapshot_update_status = 0
@@ -26,6 +25,11 @@ class CoreIndex:
         self.global_bids = {}
         self.global_asks = {}
         self.lastUpdateInOB = 0
+
+    async def start(self):
+        if self.rest_session is None:
+            self.rest_session = aiohttp.ClientSession(timeout=aiohttp.ClientTimeout(20))
+        return self.rest_session
 
     # Order-book methods ===============================================
 
@@ -37,11 +41,12 @@ class CoreIndex:
             firstUpdateId = msg.get("firstUpdateId")
             if self.snapshot_update_status == 0: 
                 self.updates[lastUpdateId] = msg
+                return False
             elif self.snapshot_update_status == -1:
                 if not self.lastUpdateInOB+1 == firstUpdateId:
                     t = asyncio.create_task(self.update_ob_snapshot());t
                     self.async_tasks.append(t)
-                    return
+                    return False
                 asks_ = msg.get("asks")
                 bids_ = msg.get("bids")
                 self._update_ob(asks_,bids_)
@@ -71,7 +76,7 @@ class CoreIndex:
                     else:
                         t = asyncio.create_task(self.update_ob_snapshot());t
                         self.async_tasks.append(t)
-                        return
+                        return False
             if len(self.global_asks) > 0 and len(self.global_bids) > 0:
                 self.bests_ob = {
                     "min":{
@@ -82,8 +87,10 @@ class CoreIndex:
                         "asks":max(self.global_asks.keys()),
                         "bids":max(self.global_bids.keys())
                 }}
+
+            return True
         except Exception as e:
-            raise e
+            raise UnknownError(f"Process Orderbook Message | {self.platform_name} >> {e}")
         
     # Update order-book levels
     def _update_ob(self,asks_,bids_):
@@ -130,7 +137,10 @@ class CoreIndex:
     # Close async sessions and tasks
     async def close(self):
         """Close all async sessions and tasks"""
-        for task in self.async_tasks:
-            task.cancel()
-        await self.rest_session.close()
+        try:   
+            for task in self.async_tasks:
+                task.cancel()
+            await self.rest_session.close()
+        except Exception as e:
+            raise UnknownError(f"Close Sessions and Tasks | {self.platform_name} >> {e}")
 
